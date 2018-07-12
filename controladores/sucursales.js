@@ -8,8 +8,8 @@ let getSucursales = (req,res)=>{
     var connection = dbConnection();
     connection.query(`SELECT * FROM sucursales `, (err, result, fields)=>{
         if(err)  res.status(500).send({message:`Error en la consulta ${err}`});
-        if(result.length < 1)  res.status(404).send({message:`No se encontraron sucursales`});
-        if(!err && result.length >= 1){
+        if(!result)  res.status(404).send({message:`No se encontraron sucursales`});
+        if(!err && result){
             res.status(200).send({result:result});
         }
         connection.destroy();
@@ -34,8 +34,8 @@ let nuevaSucursal= (req,res)=>{
     var connection = dbConnection();
     connection.query(sql,(err,result)=>{
         if(err)  res.status(500).send({message:`Error al hacer la consulta a la base de datos ${err} SQL= ${sql}`});
-        if(result.length < 1)  res.status(403).send({message: `Ha ocurrido un ERROR.... ${sql}`});
-       if(!err && result.length >= 1){
+        if(!result)  res.status(403).send({message: `Ha ocurrido un ERROR.... ${sql}`});
+       if(!err && result){
             res.status(200).send({result:result});
         }
         connection.destroy();
@@ -49,8 +49,22 @@ let updateSucursal = (req, res )=>{
     var connection = dbConnection();
     connection.query(sql,(err,result)=>{
         if(err) res.status(500).send({message:`ERROR ${err}`});
-        if(result.length < 1) res.status(404).send({message:`ERROR !result`});
-        if(!err && result.length >= 1){
+        if(!result) res.status(404).send({message:`ERROR !result`});
+        if(!err && result){
+            res.status(200).send({result:result});
+        }
+        connection.destroy();
+    });
+}
+
+let eliminarSucursal=(req,res)=>{
+    var idSucursal = req.params.id;
+    var sql = `DELETE FROM sucursales  WHERE idsucursal = ${idSucursal}`;
+    var connection = dbConnection();
+    connection.query(sql,(err,result)=>{
+        if(err) res.status(500).send({message:`ERROR ${err}`});
+        if(!result) res.status(404).send({message:`ERROR !result`});
+        if(!err && result){
             res.status(200).send({result:result});
         }
         connection.destroy();
@@ -62,5 +76,6 @@ module.exports={
     getSucursales,
     getSucursal,
     nuevaSucursal,
-    updateSucursal
+    updateSucursal,
+    eliminarSucursal
 }
