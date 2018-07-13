@@ -16,6 +16,7 @@ let rutaClientes = require('./rutas/clientes');
 let rutaNegocios = require('./rutas/negocios');
 let rutaGiroNegocios = require('./rutas/giro_negocios');
 let rutaEmpresas = require('./rutas/empresas');
+let rutasCobros = require('./rutas/cobros');
 
 //Midlewares de librerias:
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -31,7 +32,7 @@ app.use('/clientes',rutaClientes);
 app.use('/negocios',rutaNegocios);
 app.use('/giro_negocios',rutaGiroNegocios);
 app.use('/empresas',rutaEmpresas);
-
+app.use('/cobros',rutasCobros)
 
 
 //pagina sin ruta//
