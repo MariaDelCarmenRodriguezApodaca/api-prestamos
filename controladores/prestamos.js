@@ -19,7 +19,16 @@ let getPrestamos=(req,res)=>{
 
 function getPrestamosSinAprobar(req,res){
     var connection = dbConnection();
-    var sql="SELECT idprestamo,prestamos.idcliente,prestamos.idnegocio,idsucursal,fecha_solicitud,monto_solicitado,monto_interes,monto_conInteres,empleado_captura,prestamos.tipo_credito,prestamos.status,fecha_aprobacion,monto_atraso,prestamos.tiempo,interes, nombres as cliente_nombre, negocios.nombre_negocio as cliente_negocio, clientes.telefono as cliente_telefono, creditos.descripcion as creditos_descripcion, clientes.nombres as cliente_nombres, negocios.tipo_negocio FROM prestamos INNER JOIN clientes ON prestamos.idcliente = clientes.idcliente INNER JOIN negocios ON prestamos.idnegocio = negocios.idnegocio INNER JOIN creditos On prestamos.tipo_credito = creditos.idcredito WHERE prestamos.status ='?'";
+    var sql = `
+    SELECT idprestamo,prestamos.idcliente,prestamos.idnegocio,idsucursal,fecha_solicitud,monto_solicitado,monto_interes,
+    monto_conInteres,empleado_captura,prestamos.tipo_credito,prestamos.status,fecha_aprobacion,monto_atraso,prestamos.tiempo,interes,
+    nombres as cliente_nombre, negocios.nombre_negocio as cliente_negocio, clientes.telefono as cliente_telefono, creditos.descripcion as
+    creditos_descripcion, clientes.nombres as cliente_nombres, clientes.app_pat as cliente_app_pat, clientes.app_mat as cliente_app_mat,
+    negocios.tipo_negocio FROM prestamos INNER JOIN clientes ON prestamos.idcliente = clientes.idcliente 
+    INNER JOIN negocios ON prestamos.idnegocio = negocios.idnegocio 
+    INNER JOIN creditos On prestamos.tipo_credito = creditos.idcredito 
+    WHERE prestamos.status ='?'
+    `;
     connection.query(sql, (err, result, fields)=>{
         if(err)  res.status(500).send({message:`Error en la consulta ${err}`});
         if(result.length < 1)  res.status(404).send({message:`No se encontraron prestamos sin aprobar`});
