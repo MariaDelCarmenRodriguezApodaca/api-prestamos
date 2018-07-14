@@ -17,7 +17,7 @@ let rutaNegocios = require('./rutas/negocios');
 let rutaGiroNegocios = require('./rutas/giro_negocios');
 let rutaEmpresas = require('./rutas/empresas');
 let rutasCobros = require('./rutas/cobros');
-
+let rutasPrestamos = require ('./rutas/prestamos');
 //Midlewares de librerias:
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json()); //para enterder los datos que envian los clientes en formato json
@@ -33,7 +33,7 @@ app.use('/negocios',rutaNegocios);
 app.use('/giro_negocios',rutaGiroNegocios);
 app.use('/empresas',rutaEmpresas);
 app.use('/cobros',rutasCobros)
-
+app.use('/prestamos',rutasPrestamos);
 
 //pagina sin ruta//
 app.get('/',(req,res)=>{
