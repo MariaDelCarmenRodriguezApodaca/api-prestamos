@@ -7,7 +7,7 @@ const morgan  = require('morgan');
 var addHeaders = require('./middlewares/add_headers');
 var moment = require('moment');
 
-moment.locale('es');
+moment.locale('en');
 
 // Archivos de rutas
 let rutaSucursales = require('./rutas/sucursales');

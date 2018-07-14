@@ -142,7 +142,7 @@ function nuevoPrestamo(req,res){
                             connection4.query(sql,(err,result,fields)=>{
                                 if(err) res.status(500).send({message:`Error al subir prestamos y corbos ${err} ---> sql: ${cobros_sql} ${sql}`});
                                 if(!result) res.status(404).send({message:`No guardaron datos --->sql : ${cobros_sql} ${sql}`});
-                                if(!err && result && fields){
+                                if(!err && result){
                                     console.log('Se guardo un nuevo prestamo con todo y sus cobros');
                                     res.status(200).send({message:`Prestamo y cobros guardados con exito`});
                                 }
@@ -157,6 +157,8 @@ function nuevoPrestamo(req,res){
     }
     connection.destroy();
 });
+
+
     
     // INSERTAR LOS COBROS EN LA BASE DE DATOS
     
