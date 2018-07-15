@@ -7,6 +7,7 @@ ruta.get('/get_xcliente/:id',contCobros.getCobrosPorCliente);
 ruta.get('/get_xrealizar',contCobros.getCobrosXRealizar);
 ruta.get('/get_atrasados',contCobros.getCobrosAtrasados);
 ruta.get('/get_atrasados_xcliente/:id',contCobros.getCobrosAtrasadosXCliente);
+ruta.get('/get_xrealizar_diarios',contCobros.cobrosXRealizarDia);
 
 
 
