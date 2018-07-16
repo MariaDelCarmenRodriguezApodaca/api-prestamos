@@ -43,9 +43,24 @@ let addEmpresa= (req,res)=>{
     });
 }
 
+function updateEmpresa(req,res){
+    var idEmpresa = req.params.id;
+    var data = req.body;
+    if(!data.razon_social || !data.direccion || !data.descripcion)return res.status(403).send({message:`No sen enviaron todos los datos`});
+    var connection = dbConnection();
+    connection.query(`UPDATE empresas set razon_social='${data.razon_social}', direccion = '${data.direccion}', descripcion ='${data.descripcion}' WHERE idempresa = ${idEmpresa}`,(err,result)=>{
+        if(err)  res.status(500).send({message:`Error al hacer la consulta a la base de datos ${err} SQL= ${sql}`});
+        if(!result)  res.status(403).send({message: `Ha ocurrido un ERROR.... ${sql}`});
+        if(!err && result){
+            res.status(200).send({result:`Empresa Actualizada`});
+        }
+        connection.destroy();
+    });
+}
 
 module.exports={
 	getEmpresas,
 	getEmpresa,
-    addEmpresa
+    addEmpresa,
+    updateEmpresa
 }

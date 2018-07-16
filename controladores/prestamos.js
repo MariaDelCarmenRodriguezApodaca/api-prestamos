@@ -42,7 +42,7 @@ function getPrestamosSinAprobar(req,res){
 function aprobarRechazarPrestamo(req,res){
     var id_prestamo = req.params.id;
     var status = req.body.status;
-    if(status!='A' && status !="R") return status(403).send({message:`El status no es correcto`});
+    if(status !="A" && status !="R") return res.status(403).send({message:`El status no es correcto`});
     var fecha_actual = moment().format('LLLL');
     var connection = dbConnection();
     var sql=`UPDATE prestamos set status = '${status}', fecha_aprobacion='${fecha_actual}' where idprestamo=${id_prestamo} `;
@@ -50,7 +50,19 @@ function aprobarRechazarPrestamo(req,res){
         if(err)  res.status(500).send({message:`Error en la consulta ${err}   ---> ${sql}`});
         if(!result)  res.status(404).send({message:`No pudo actualizar el status.... ${sql}`});
         if(!err && result){
-            res.status(200).send({result:result,sql:sql});
+            if(status == 'R'){
+                sql = `DELETE  FROM cobros WHERE idprestamo=${id_prestamo}`
+                var connection2=dbConnection()
+                connection2.query(sql,(err,result)=>{
+                    if(err)  res.status(500).send({message:`Error en la consulta ${err}   ---> ${sql}`});
+                    if(!result)  res.status(404).send({message:`No pudo actualizar el status.... ${sql}`});
+                    if(!err && result){
+                        res.status(200).send({result:result,sql:sql});
+                    }
+                    connection2.destroy();
+                })
+            }
+
         }
         connection.destroy();
     });

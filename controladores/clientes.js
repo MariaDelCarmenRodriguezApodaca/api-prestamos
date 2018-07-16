@@ -50,7 +50,20 @@ let addCliente=(req,res)=>{
 	});
 }
 
-// falta nuevoCliente()
+function updateCliente(req,res){
+	var data=req.body;
+	if(!data.nombres || !data.app_pat || !data.app_mat || !data.callenum || !data.colonia || !data.estado || !data.municipio || !data.poblacion || !data.telefono || !data.status) return res.status(403).send({message:`No se enviaron todos los datos, datos enviados ${data}`});
+	var sql= `UPDATE clientes SET nombres='${data.nombres}', app_pat='${data.app_pat}', app_mat='${data.app_mat}', callenum='${data.callenum}', colonia='${data.colonia}', estado='${data.estado}' municipio='${data.municipio}', poblacion='${data.poblacion}', telefono='${data.telefono}', status='${data.status}'`;
+	var connection= dbConnection();
+	connection.query(sql,(err,result)=>{
+		if(err) res.status(500).send({message:`ERROR ocurrio un error al actualizar al cliente ${err} ---> sql: ${sql}`});
+		if(!result) res.status(404).send({message:`No se pudo actualizar al cliente ---> sql : ${sql}`});
+		if(!err && result ){
+			res.status(200).send({result:result,sql:sql});
+		}
+		connection.destroy();
+	});
+}
 
 
 //subir imagenes al servidor
@@ -167,5 +180,6 @@ module.exports={
 	imagenDireccion,
 	imagenIne,
 	regresarImg,
-	regresarImgRuta
+	regresarImgRuta,
+	updateCliente
 }

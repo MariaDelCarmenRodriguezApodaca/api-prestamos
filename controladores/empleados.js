@@ -40,7 +40,7 @@ let nuevoEmpleado=(req,res)=>{
     var data = req.body;
     var fecha_alta = moment().format('LLLL');
     if(!data.nombres || !data.app_pat || !data.app_mat || !data.callenum || !data.colonia || !data.estado || !data.municipio || !data.poblacion || !data.telefono  || !data.usuario || !data.password || !data.status ) return res.status(403).send({message:`ERROR  no se enviaron todos los datos`});
-    var sql = `INSERT INTO empleados VALUES(NULL,'${data.nombres}','${data.app_pat}','${data.app_mat}','${data.callenum}', '${data.colonia}','${data.estado}','${data.municipio}', '${data.poblacion}','${data.telefono}', '${fecha_alta}','${data.negocio}', '${data.sucursal}','${data.usuario}', '${data.password}',1, '${data.puesto}','${data.derecho_esp}')`;
+    var sql = `INSERT INTO empleados VALUES(NULL,'${data.nombres}','${data.app_pat}','${data.app_mat}','${data.callenum}', '${data.colonia}','${data.estado}','${data.municipio}', '${data.poblacion}','${data.telefono}', '${fecha_alta}','${data.negocio}', '${data.sucursal}','${data.usuario}', '${data.password}','Activo', '${data.puesto}','${data.derecho_esp}')`;
     var connection = dbConnection();
     connection.query(sql,(err,result)=>{
         if(err)  res.status(500).send({message:`Error al hacer la consulta a la base de datos ${err} SQL= ${sql}`});

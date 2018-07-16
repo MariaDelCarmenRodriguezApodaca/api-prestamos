@@ -11,6 +11,7 @@ var md_upload = multipart({ uploadDir:'./uploads/clientes' });
 ruta.get('/get',contClientes.getClientes);
 ruta.get('/get/:id',contClientes.getCliente);
 ruta.post('/nuevo',contClientes.addCliente);
+ruta.put('/update/:id',contClientes.updateCliente);
 
 
 ruta.post('/imagen_direccion/:id',md_upload,contClientes.imagenDireccion);

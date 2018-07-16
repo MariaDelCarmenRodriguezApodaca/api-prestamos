@@ -130,6 +130,7 @@ function cobrosXRealizarDia(req,res){
     cobros.idcobro as cobro_idcobro,
     cobros.cantidad_cobro as cobro_cantidad_cobro,
     cobros.fecha_cobro as cobro_fecha_cobro,
+    cobros.status as cobro_status,
     prestamos.idprestamo as prestamo_idprestamo,
     prestamos.monto_solicitado as prestamo_monto_solicitado,
     prestamos.monto_conInteres as prestamo_monto_conInteres,
@@ -147,7 +148,8 @@ function cobrosXRealizarDia(req,res){
     `
     var connection = dbConnection();
     var data = [];
-    var hoy = moment().format('YYYY-MM-DD')
+    var hoy = moment().format('YYYY-MM-DD');
+    var pagoCompelto=0;
     connection.query(sql,(err,result)=>{
         if(err)  res.status(500).send({message:`Error en la consulta ${err}`});
         if(!result)  res.status(404).send({message:`No se encontraron cobros`});
@@ -157,17 +159,59 @@ function cobrosXRealizarDia(req,res){
                 var momentObj = moment(dateObj);
                 var momentString = momentObj.format('YYYY-MM-DD');
                  console.log(momentString);
-                if(moment(momentString).isSame(hoy)){
+                var status =result[i].cobro_status;
+                if(status=='Pendiente' && moment(momentString).isSame(hoy) || moment(momentString).isBefore(hoy) ){
+                    console.log(moment(momentString)+'='+hoy)
+                    console.log('--------->status', result[i].cobro_status);
                     data.push(result[i]);
                 }
+                if(status=='Pendiente'){
+                    pagoCompelto += result[i].cobro_cantidad_cobro;
+                }
+                
             }
+
             console.log(`Data--->`);
             console.log(data);
-            res.status(200).send({result:data});
+            console.log(`Pago completo ${pagoCompelto}`);
+            
+            res.status(200).send({'result':data,'completo':pagoCompelto});
             }
         connection.destroy();
     });
 }
+
+function pagoRequerido(req,res){
+    var idcobro= req.body.cobro.cobro_idcobro;
+    var comentario = req.body.comentario
+    console.log(idcobro+'   '+comentario)
+    var connection = dbConnection();
+    var sql=`Update cobros SET status='Pagado', comentario_cobro='${comentario}' WHERE idcobro=${idcobro}`
+    connection.query(sql,(err,result)=>{
+        if(err) res.status(500).send({message:`ERROR ${err}`});
+        if(!result) res.status(404).send({message:`ERROR !result`});
+        if(!err && result){
+            res.status(200).send({result:`cobro modificada con exito`});
+        }
+        connection.destroy();
+    });
+
+}
+function pagoCompleto(req,res){
+    var idprestamo= req.body.cobro.prestamo_idprestamo;
+    var comentario = req.body.comentario
+    var connection = dbConnection();
+    var sql =`Update cobros SET status='Pagado', comentario_cobro='${comentario}' WHERE idprestamo=${idprestamo} AND status='Pendiente'`
+    connection.query(sql,(err,result)=>{
+        if(err) res.status(500).send({message:`ERROR ${err} --- sql${sql}`});
+        if(!result) res.status(404).send({message:`ERROR !result`});
+        if(!err && result){
+            res.status(200).send({result:`cobros modificada con exito`});
+        }
+        connection.destroy();
+    });
+}
+
 
 module.exports={
     getCobros,
@@ -176,5 +220,7 @@ module.exports={
     getCobrosAtrasados,
     getCobrosAtrasados,
     getCobrosAtrasadosXCliente,
-    cobrosXRealizarDia
+    cobrosXRealizarDia,
+    pagoRequerido,
+    pagoCompleto
 }
