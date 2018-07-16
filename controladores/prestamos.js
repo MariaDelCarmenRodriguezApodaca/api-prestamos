@@ -144,7 +144,7 @@ function nuevoPrestamo(req,res){
                                 if(!result) res.status(404).send({message:`No guardaron datos --->sql : ${cobros_sql} ${sql}`});
                                 if(!err && result){
                                     console.log('Se guardo un nuevo prestamo con todo y sus cobros');
-                                    res.status(200).send({message:`Prestamo y cobros guardados con exito`});
+                                    res.status(200).send({result:`Prestamo y cobros guardados con exito`});
                                 }
                                 connection4.destroy();
                             });

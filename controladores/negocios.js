@@ -43,12 +43,12 @@ function getNegocioXCliente(req,res){
 
 function addNegocio(req,res){
     var data = req.body;
-    if(!data.idcliente || !data.nombre_negocio || !data.callenum ||!data.colonia || !data.estado || !data.municipio || !data.poblacion || !data.giro_negocio) return res.status(403).send({message:`No se enviaron todos los datos`})
+    if(!data.idcliente || !data.nombre_negocio || !data.callenum ||!data.colonia || !data.estado || !data.municipio || !data.poblacion ||!data.tipo_negocio || !data.giro_negocio) return res.status(403).send({message:`No se enviaron todos los datos`})
     var connection = dbConnection();
-    var sql = `INSERT INTO negocios VALUES (null,${data.idcliente},'${data.nombre_negocio}','${data.callenum}','${data.colonia}','${data.estado}','${data.municipio}','${data.poblacion}',null,null,${data.giro_negocio})`
+    var sql = `INSERT INTO negocios VALUES (null,${data.idcliente},'${data.nombre_negocio}','${data.callenum}','${data.colonia}','${data.estado}','${data.municipio}','${data.poblacion}',null,'${data.tipo_negocio}',${data.giro_negocio})`
     connection.query(sql,(err,result)=>{
         if(err)  res.status(500).send({message:`Error al hacer la consulta a la base de datos ${err} SQL= ${sql}`});
-        if(!result)  res.status(403).send({message: `Ha ocurrido un ERROR.... ${sql}`});
+        if(!result && !err)  res.status(403).send({message: `Ha ocurrido un ERROR.... ${sql}`});
         if(!err && result){
             res.status(200).send({result:`negocio guardada`});
         }

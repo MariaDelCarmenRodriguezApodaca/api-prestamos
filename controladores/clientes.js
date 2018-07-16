@@ -36,7 +36,8 @@ let getCliente=(req,res)=>{
 
 let addCliente=(req,res)=>{
 	var data = req.body;
-	if(!data.nombres || !data.app_pat || !data.app_mat || !data.callenum || !data.colonia || !data.estado || ! data.municipio || !data.poblacion || !data.telefono) return res.status(403).send({message:`No se enviaron todos los datos, datos enviados ${data}`});
+	console.log('Data:',data);
+	if(!data.nombres || !data.app_pat || !data.app_mat || !data.callenum || !data.colonia || !data.estado || !data.municipio || !data.poblacion || !data.telefono) return res.status(403).send({message:`No se enviaron todos los datos, datos enviados ${data}`});
 	var sql = `INSERT INTO clientes VALUES (null,'${data.nombres}','${data.app_pat}','${data.app_mat}','${data.callenum}','${data.colonia}','${data.estado}','${data.municipio}','${data.poblacion}','${data.telefono}',1,null,null,null,0)`;
 	var connection = dbConnection();
 	connection.query(sql,(err,result)=>{
