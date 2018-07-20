@@ -155,8 +155,17 @@ function nuevoPrestamo(req,res){
                                 if(err) res.status(500).send({message:`Error al subir prestamos y corbos ${err} ---> sql: ${cobros_sql} ${sql}`});
                                 if(!result) res.status(404).send({message:`No guardaron datos --->sql : ${cobros_sql} ${sql}`});
                                 if(!err && result){
-                                    console.log('Se guardo un nuevo prestamo con todo y sus cobros');
-                                    res.status(200).send({result:`Prestamo y cobros guardados con exito`});
+                                    var connection5=dbConnection();
+                                    sql=`INSERT INTO encuestas VALUES(null,'${idcliente}',null,null,null,null,null,null,null,null,null,null,null,'${monto_solicitado}',null,'${idnegocio}',null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'Pendiente')`
+                                    connection5.query(sql,(err,result)=>{
+                                        if(err) res.status(500).send({message:`Error al subir prestamos y corbos ${err} ---> sql: ${cobros_sql} ${sql}`});
+                                        if(!result) res.status(404).send({message:`No guardaron datos --->sql : ${cobros_sql} ${sql}`});
+                                        if(!err && result){
+                                            console.log('Se guardo un nuevo prestamo con todo y sus cobros');
+                                            res.status(200).send({result:`Prestamo y cobros guardados con exito`});
+                                
+                                        }
+                                    });
                                 }
                                 connection4.destroy();
                             });

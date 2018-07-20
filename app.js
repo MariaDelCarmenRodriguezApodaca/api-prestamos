@@ -19,6 +19,7 @@ let rutaEmpresas = require('./rutas/empresas');
 let rutasCobros = require('./rutas/cobros');
 let rutasPrestamos = require ('./rutas/prestamos');
 let rutasTiposCredito = require('./rutas/tipos_creditos')
+let rutasEncuesta = require('./rutas/encuestas');
 
 //Midlewares de librerias:
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -37,6 +38,8 @@ app.use('/empresas',rutaEmpresas);
 app.use('/cobros',rutasCobros)
 app.use('/prestamos',rutasPrestamos);
 app.use('/tipos_creditos',rutasTiposCredito);
+app.use('/encuestas',rutasEncuesta);
+
 
 //pagina sin ruta//
 app.get('/',(req,res)=>{
