@@ -50,6 +50,7 @@ let getEncuesta = (req,res)=>{
         connection.destroy();
     })
 }
+
 function nuevaEncuesta(req,res){
     var data = req.body;
     if(!data.idcliente ||
@@ -95,10 +96,27 @@ function nuevaEncuesta(req,res){
         })
 }
 
+function updateEncuesta(req,res){
+    var idencuesta=req.params.id;
+    var data = req.body;
+    var fecha_actual= moment().format('YYYY/MM/DD');
+    var sql = `UPDATE encuestas SET idcliente=${data.idcliente},fecha='${fecha_actual}', representante='${data.representante}', nombre_ruta='${data.nombre_ruta}', nombre_cliente ='${data.nombre_cliente}', fecha_nacimiento='${data.fecha_nacimiento}',edad='${data.edad}',comprobante_envia='${data.comprobante_envia}',domicilio='${data.domicilio}',domicilio_propio_rentado='${data.domicilio_propio_rentado}',dependientes_economicos='${data.dependientes_economicos}',telefono='${data.telefono}',monto_solicitado='${data.monto_solicitado}',monto_autorizado='${data.monto_autorizado}',idnegocio='${data.idnegocio}',giro_negocio='${data.giro_negocio}',ingresos_semanales='${data.ingresos_semanales}',propietario_o_empleado='${data.propietario_o_empleado}',antiguedad_negocio='${data.antiguedad_negocio}',contrato_arrendamiento='${data.contrato_arrendamiento}',ubicacion='${data.ubicacion}',hora_laboran='${data.hora_laboran}',nombre_aval='${data.nombre_aval}',antiguedad_conocerse='${data.antiguedad_conocerse}',telefono_aval='${data.telefono_aval}',nombre_familiar='${data.nombre_familiar}',parentesco='${data.parentesco}',telefono_familiar='${data.telefono_familiar}',como_supo='${data.como_supo}',fecha_liberacion='${data.fecha_liberacion}',status='Terminada'  WHERE idencuesta=${idencuesta}`;
+    var connection=dbConnection();
+    connection.query(sql,(err,result)=>{
+        if(err)  res.status(500).send({message:`Error al hacer la consulta a la base de datos ${err} SQL= ${sql}`});
+            if(!result)  res.status(403).send({message: `Ha ocurrido un ERROR.... ${sql}`});
+            if(!err && result){
+                res.status(200).send({result:result});
+            }
+            connection.destroy();
+    })
+}
+
 module.exports={
     getEncuestas,
     getEncuesta,
     nuevaEncuesta,
     getEncuestasPendientes,
-    getEncuestasTerminadas
+    getEncuestasTerminadas,
+    updateEncuesta
 }

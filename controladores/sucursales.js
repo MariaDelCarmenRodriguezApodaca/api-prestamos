@@ -30,7 +30,7 @@ let getSucursal = (req,res)=>{
 let nuevaSucursal= (req,res)=>{
     var data = req.body;
     if(!data.nombre ||  !data.callenum || !data.colonia || !data.poblacion || !data.municipio || !data.estado  || !data.hora_inicio || !data.hora_fin || !data.telefono || !data.encargado  ) return res.status(403).send({message:`Faltaron datos en la peticion`}); 
-    var sql=`INSERT INTO sucursales VALUES (null, '${data.nombre}','${data.callenum}','${data.colonia}','${data.poblacion}','${data.municipio}','${data.estado}','${data.status}','${data.hora_inicio}','${data.hora_fin}',${data.encargado},'${data.telefono}','${data.id_empresa}')`;
+    var sql=`INSERT INTO sucursales VALUES (null, '${data.nombre}','${data.callenum}','${data.colonia}','${data.poblacion}','${data.municipio}','${data.estado}','${data.status}','${data.hora_inicio}','${data.hora_fin}','${data.encargado}','${data.telefono}','${data.id_empresa}')`;
     var connection = dbConnection();
     connection.query(sql,(err,result)=>{
         if(err)  res.status(500).send({message:`Error al hacer la consulta a la base de datos ${err} SQL= ${sql}`});

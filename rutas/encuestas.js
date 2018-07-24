@@ -8,5 +8,6 @@ ruta.get('/get_pendientes', contEncuestas.getEncuestasPendientes);
 ruta.get('/get_terminadas', contEncuestas.getEncuestasTerminadas);
 ruta.get('/get/:id',contEncuestas.getEncuesta);
 ruta.post('/nueva',contEncuestas.nuevaEncuesta);
+ruta.put('/update/:id',contEncuestas.updateEncuesta);
 
 module.exports=ruta;
