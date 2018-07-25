@@ -43,7 +43,7 @@ function aprobarRechazarPrestamo(req,res){
     var id_prestamo = req.params.id;
     var status = req.body.status;
     if(status !="A" && status !="R") return res.status(403).send({message:`El status no es correcto`});
-    var fecha_actual = moment().format('LLLL');
+    var fecha_actual = moment()
     var connection = dbConnection();
     var sql=`UPDATE prestamos set status = '${status}', fecha_aprobacion='${fecha_actual}' where idprestamo=${id_prestamo} `;
     connection.query(sql,(err,result)=>{
@@ -85,7 +85,7 @@ function nuevoPrestamo(req,res){
             var idcliente = data.idcliente;
             var idnegocio = data.idnegocio;
             var idsucursal = data.idsucursal;
-            var fecha_solicitud = moment().format('LLLL');
+            var fecha_solicitud = moment();
             var monto_solicitado = data.monto_solicitado;
             var empleado_captura = data.empleado_captura;
             var tipo_credito = data.tipo_credito; //id del tipo del credito
@@ -135,7 +135,7 @@ function nuevoPrestamo(req,res){
                         // var data = 
                         // var data = `null,${idprestamo},${idcliente},${empleado_captura},'${fecha_moment.format('LLLL')}','${cobro_unitario}',null,null,'Pendiente'`;
                         
-                        values.push(['null',idprestamo,idcliente,empleado_captura,fecha_moment.format('LLLL'),cobro_unitario,'null','null','Pendiente']);
+                        values.push(['null',idprestamo,idcliente,empleado_captura,fecha_moment,cobro_unitario,'null','null','Pendiente']);
                         //cobros_sql += ` INSERT INTO cobros VALUES(null,${idprestamo},${idcliente},${empleado_captura},'${fecha_moment.format('LLLL')}','${cobro_unitario}',null,null,'Pendiente');`;
                         fecha_moment  = moment().add(i+1,`${addMoment}`);
                     }
