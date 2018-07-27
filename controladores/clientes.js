@@ -12,8 +12,7 @@ let getClientes=(req,res)=>{
 	var connection = dbConnection();
 	connection.query(`SELECT * FROM clientes`,(err,result,fields)=>{
 		if(err) res.status(500).send({message:`ERROR ocurrio un error en la consulta`});
-		if(!result) res.status(404).send({message:`No existen clientes resgistrados`});
-		if(!err && result ){
+		if(!err){
 			res.status(200).send({result:result});
 		}
 		connection.destroy();
@@ -26,8 +25,7 @@ let getCliente=(req,res)=>{
 	var connection=dbConnection();
 	connection.query(`SELECT * FROM clientes WHERE idcliente= '${idCliente}'`,(err,result,fields)=>{
 		if(err) res.status(500).send({message:`ERROR ocurrio un error en la consulta`});
-		if(!result) res.status(404).send({message:`No existe el cliente solicitado`});
-		if(!err && result ){
+		if(!err){
 			res.status(200).send({result:result});
 		}
 		connection.destroy();
@@ -42,8 +40,7 @@ let addCliente=(req,res)=>{
 	var connection = dbConnection();
 	connection.query(sql,(err,result)=>{
 		if(err) res.status(500).send({message:`ERROR ocurrio un error al añadir al cliente ${err} ---> sql: ${sql}`});
-		if(!result) res.status(404).send({message:`No se pudo añadir al cliente ---> sql : ${sql}`});
-		if(!err && result ){
+		if(!err){
 			res.status(200).send({result:result,sql:sql});
 		}
 		connection.destroy();
@@ -57,8 +54,7 @@ function updateCliente(req,res){
 	var connection= dbConnection();
 	connection.query(sql,(err,result)=>{
 		if(err) res.status(500).send({message:`ERROR ocurrio un error al actualizar al cliente ${err} ---> sql: ${sql}`});
-		if(!result) res.status(404).send({message:`No se pudo actualizar al cliente ---> sql : ${sql}`});
-		if(!err && result ){
+		if(!err ){
 			res.status(200).send({result:result,sql:sql});
 		}
 		connection.destroy();
@@ -90,8 +86,7 @@ function imagenDireccion(req,res){
 			var sql=`UPDATE clientes SET imagen_direccion = '${file_name}' WHERE idcliente = ${clienteId}`;
 			connection.query(sql,(err,result)=>{
 				if(err) res.status(500).send({message:`ERROR ocurrio un error: ${err} en la consulta sql: ${sql}`});
-				if(!result) res.status(404).send({message:`No existe el cliente solicitado sql: ${sql}`});
-				if(!err && result){
+				if(!err){
 					res.status(200).send({result:result});
 				}
 				connection.destroy();
@@ -124,8 +119,7 @@ function imagenIne(req,res){
 			var sql=`UPDATE clientes SET imagen_ine = '${file_name}' WHERE idcliente = ${clienteId}`;
 			connection.query(sql,(err,result)=>{
 				if(err) res.status(500).send({message:`ERROR ocurrio un error: ${err} en la consulta sql: ${sql}`});
-				if(!result) res.status(404).send({message:`No existe el cliente solicitado sql: ${sql}`});
-				if(!err && result){
+				if(!err){
 					res.status(200).send({result:result});
 				}
 				connection.destroy();

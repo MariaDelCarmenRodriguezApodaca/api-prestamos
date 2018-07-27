@@ -7,8 +7,7 @@ let getEmpresas=(req,res)=>{
     var connection = dbConnection();
     connection.query(`SELECT * FROM empresas `, (err, result, fields)=>{
         if(err)  res.status(500).send({message:`Error en la consulta ${err}`});
-        if(result.length < 1)  res.status(404).send({message:`No se encontraron empresas`});
-        if(!err && result.length >= 1){
+       if(!err){
             res.status(200).send({result:result});
         }
         connection.destroy();
@@ -20,8 +19,7 @@ let getEmpresa=(req,res)=>{
     var connection = dbConnection();
     connection.query(`SELECT * FROM empresas WHERE idEmpresa = ${idEmpresa} `, (err, result, fields)=>{
         if(err)  res.status(500).send({message:`Error en la consulta ${err}`});
-        if(!result)  res.status(404).send({message:`No se encontro a la empresa`});
-        if(!err && result){
+        if(!err){
             res.status(200).send({result:result});
         }
         connection.destroy();
@@ -35,8 +33,7 @@ let addEmpresa= (req,res)=>{
     var sql = `INSERT INTO empresas VALUES (null,'${data.razon_social}','${data.direccion}','${data.descripcion}') `;
     connection.query(sql,(err,result)=>{
         if(err)  res.status(500).send({message:`Error al hacer la consulta a la base de datos ${err} SQL= ${sql}`});
-        if(!result)  res.status(403).send({message: `Ha ocurrido un ERROR.... ${sql}`});
-        if(!err && result){
+        if(!err){
             res.status(200).send({result:`Empresa guardada`});
         }
         connection.destroy();
@@ -50,8 +47,7 @@ function updateEmpresa(req,res){
     var connection = dbConnection();
     connection.query(`UPDATE empresas set razon_social='${data.razon_social}', direccion = '${data.direccion}', descripcion ='${data.descripcion}' WHERE idempresa = ${idEmpresa}`,(err,result)=>{
         if(err)  res.status(500).send({message:`Error al hacer la consulta a la base de datos ${err} SQL= ${sql}`});
-        if(!result)  res.status(403).send({message: `Ha ocurrido un ERROR.... ${sql}`});
-        if(!err && result){
+        if(!err){
             res.status(200).send({result:`Empresa Actualizada`});
         }
         connection.destroy();

@@ -7,7 +7,7 @@ const morgan  = require('morgan');
 var addHeaders = require('./middlewares/add_headers');
 var moment = require('moment');
 
-moment.locale('en');
+// moment.locale('en');
 
 // Archivos de rutas
 let rutaSucursales = require('./rutas/sucursales');
@@ -20,6 +20,7 @@ let rutasCobros = require('./rutas/cobros');
 let rutasPrestamos = require ('./rutas/prestamos');
 let rutasTiposCredito = require('./rutas/tipos_creditos')
 let rutasEncuesta = require('./rutas/encuestas');
+let rutasRutas = require('./rutas/rutas');
 
 //Midlewares de librerias:
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -39,6 +40,7 @@ app.use('/cobros',rutasCobros)
 app.use('/prestamos',rutasPrestamos);
 app.use('/tipos_creditos',rutasTiposCredito);
 app.use('/encuestas',rutasEncuesta);
+app.use('/rutas',rutasRutas);
 
 
 //pagina sin ruta//

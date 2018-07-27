@@ -2,21 +2,12 @@
 const moment = require('moment');
 const config = require('../config');
 const dbConnection = config.connection;
-// Poner moment en español 
-// moment.locale('es', {
-//     months: 'Enero_Febrero_Marzo_Abril_Mayo_Junio_Julio_Agosto_Septiembre_Octubre_Noviembre_Diciembre'.split('_'),
-//     monthsShort: 'Enero._Feb._Mar_Abr._May_Jun_Jul._Ago_Sept._Oct._Nov._Dec.'.split('_'),
-//     weekdays: 'Domingo_Lunes_Martes_Miercoles_Jueves_Viernes_Sabado'.split('_'),
-//     weekdaysShort: 'Dom._Lun._Mar._Mier._Jue._Vier._Sab.'.split('_'),
-//     weekdaysMin: 'Do_Lu_Ma_Mi_Ju_Vi_Sa'.split('_')
-// });
 
 let getEmpleados=(req,res)=>{
     var connection = dbConnection();
     connection.query(`SELECT * FROM empleados `, (err, result, fields)=>{
         if(err)  res.status(500).send({message:`Error en la consulta ${err}`});
-        if(!result)  res.status(404).send({message:`No se encontraron empleados`});
-        if(!err && result){
+        if(!err){
             res.status(200).send({result:result});
         }
         connection.destroy();
@@ -28,8 +19,7 @@ let getempleado=(req,res)=>{
     var connection = dbConnection();
     connection.query(`SELECT * FROM empleados WHERE idempleado = ${idEmpleado} `, (err, result, fields)=>{
         if(err)  res.status(500).send({message:`Error en la consulta ${err}`});
-        if(!result)  res.status(404).send({message:`No se encontro al empleado`});
-        if(!err && result){
+        if(!err){
             res.status(200).send({result:result});
         }
         connection.destroy();
@@ -44,8 +34,7 @@ let nuevoEmpleado=(req,res)=>{
     var connection = dbConnection();
     connection.query(sql,(err,result)=>{
         if(err)  res.status(500).send({message:`Error al hacer la consulta a la base de datos ${err} SQL= ${sql}`});
-        if(!result)  res.status(403).send({message: `Ha ocurrido un ERROR.... ${sql}`});
-        if(!err && result){
+        if(!err){
             res.status(200).send({result:`Empleado guardada`});
         }
         connection.destroy();
@@ -60,8 +49,7 @@ let updateEmpleado = (req,res)=>{
     var connection = dbConnection();
     connection.query(sql,(err,result)=>{
         if(err) res.status(500).send({message:`ERROR ${err}`});
-        if(!result) res.status(404).send({message:`ERROR !result`});
-        if(!err && result){
+        if(!err){
             res.status(200).send({result:`Empleado modificada con exito`});
         }
         connection.destroy();
@@ -70,13 +58,12 @@ let updateEmpleado = (req,res)=>{
 
 let login =(req,res)=>{
     var data = req.body;
-    if(!data.usuario || !data.password) res.status(403).send({message:`ERROR faltaron datos`})
+    if(!data.usuario || !data.password)return res.status(403).send({message:`ERROR faltaron datos`})
     var sql = `SELECT * FROM empleados WHERE usuario = '${data.usuario}' && password='${data.password}' `;
     var connection = dbConnection();
     connection.query(sql,(err,result,fields)=>{
         if(err) res.status(500).send({message:`ERROR ${err}`});
-        if(!result) res.status(404).send({message:`ERROR contraseña o usuarios incorrectos`});
-        if(!err && result){
+        if(!err){
             if(result) res.status(200).send({result:result});
         }
         connection.destroy();

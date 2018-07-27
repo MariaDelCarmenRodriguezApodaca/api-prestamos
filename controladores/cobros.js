@@ -7,8 +7,7 @@ function getCobros(req,res){
     var connection = dbConnection();
     connection.query(`SELECT * FROM cobros `, (err, result, fields)=>{
         if(err)  res.status(500).send({message:`Error en la consulta ${err}`});
-        if(!result)  res.status(404).send({message:`No se encontraron cobros`});
-        if(!err && result){
+        if(!err){
             res.status(200).send({result:result});
         }
         connection.destroy();
@@ -20,8 +19,7 @@ function getCobrosPorCliente(req,res){
     var connection = dbConnection();
     connection.query(`SELECT * FROM cobros WHERE idcliente='${idCliente}' `, (err, result, fields)=>{
         if(err)  res.status(500).send({message:`Error en la consulta ${err}`});
-        if(!result)  res.status(404).send({message:`No se encontraron cobros`});
-        if(!err && result){
+        if(!err){
             res.status(200).send({result:result});
         }
         connection.destroy();
@@ -32,8 +30,7 @@ function getCobrosXRealizar(req,res){
     var connection = dbConnection();
     connection.query(`SELECT * FROM cobros WHERE status='Pendiente' `, (err, result, fields)=>{
         if(err)  res.status(500).send({message:`Error en la consulta ${err}`});
-        if(!result)  res.status(404).send({message:`No se encontraron cobros`});
-        if(!err && result){
+        if(!err){
             res.status(200).send({result:result});
         }
         connection.destroy();
@@ -48,8 +45,7 @@ function getCobrosAtrasados(req,res){
     var hoy=moment().format('YYYY-MMM-DD');
     connection.query(`SELECT * FROM cobros`, (err, result, fields)=>{
         if(err)  res.status(500).send({message:`Error en la consulta ${err}`});
-        if(!result)  res.status(404).send({message:`No se encontraron cobros`});
-        if(!err && result){
+        if(!err){
 
             console.log(result[0].fecha_cobro);
 
@@ -83,8 +79,7 @@ function getCobrosAtrasadosXCliente(req,res){
     var hoy=moment().format('YYYY-MM-DD');
     connection.query(`SELECT * FROM cobros WHERE idcliente = ${idcliente} AND status = 'Pendiente'`, (err, result, fields)=>{
         if(err)  res.status(500).send({message:`Error en la consulta ${err}`});
-        if(!result)  res.status(404).send({message:`No se encontraron cobros`});
-        if(!err && result){
+        if(!err){
 
             console.log(result[0].fecha_cobro);
 
@@ -160,10 +155,12 @@ function cobrosXRealizarDia(req,res){
                 var momentString = momentObj.format('YYYY-MM-DD');
                  console.log(momentString);
                 var status =result[i].cobro_status;
-                if(status=='Pendiente' && moment(momentString).isSame(hoy) || moment(momentString).isBefore(hoy) ){
-                    console.log(moment(momentString)+'='+hoy)
-                    console.log('--------->status', result[i].cobro_status);
-                    data.push(result[i]);
+                if(status=='Pendiente'){
+                    if(status=='Pendiente' && moment(momentString).isSame(hoy) || moment(momentString).isBefore(hoy) ){
+                        console.log(moment(momentString)+'='+hoy)
+                        console.log('--------->status', result[i].cobro_status);
+                        data.push(result[i]);
+                    }
                 }
                 if(status=='Pendiente'){
                     pagoCompelto += result[i].cobro_cantidad_cobro;

@@ -10,8 +10,7 @@ let getNegocios=(req,res)=>{
 	var connection = dbConnection();
 	connection.query(`SELECT * FROM giros`,(err,result,fields)=>{
 		if(err) res.status(500).send({message:`ERROR ocurrio un error en la consulta`});
-		if(result.length < 1) res.status(404).send({message:`No existen giro de negocios resgistrados`});
-		if(!err && result.length >=1 ){
+		if(!err){
 			res.status(200).send({result:result});
 		}
 		connection.destroy();
@@ -26,8 +25,7 @@ let getNegocio=(req,res)=>{
 	var connection=dbConnection();
 	connection.query(`SELECT * FROM giros WHERE idgiro= '${idNegocio}'`,(err,result,fields)=>{
 		if(err) res.status(500).send({message:`ERROR ocurrio un error en la consulta ${err} ... sql = ${sql}`});
-		if(!result.length) res.status(404).send({message:`No existe el giro negocio solicitado`});
-		if(!err && result.length ){
+		if(!err){
 			res.status(200).send({result:result});
 		}
 		connection.destroy();
@@ -41,8 +39,7 @@ let nuevoGiro = (req,res)=>{
 	var connection = dbConnection();
 	connection.query(sql,(err,result)=>{
 		if(err) res.status(500).send({message:`ERROR No se guardo  la consulta ${sql}`});
-		if(!result) res.status(404).send({message:`No se guardo el giro negocio solicitado`});
-		if(!err &&  result ){
+		if(!err){
 			console.log(sql);
 			res.status(200).send({result:result});
 		}
@@ -59,8 +56,7 @@ function actualizarGiro(req,res){
     var connection = dbConnection();
     connection.query(sql,(err,result)=>{
         if(err) res.status(500).send({message:`ERROR ${err}`});
-        if(result.length<1) res.status(404).send({message:`ERROR !result`});
-        if(!err && result){
+        if(!err){
             res.status(200).send({result:`giro modificada con exito`});
         }
         connection.destroy();
