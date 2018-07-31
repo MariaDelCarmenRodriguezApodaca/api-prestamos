@@ -8,5 +8,6 @@ ruta.get('/get/:id',contEmpleados.getempleado);
 ruta.post('/nuevo',contEmpleados.nuevoEmpleado);
 ruta.put('/update/:id',contEmpleados.updateEmpleado);
 ruta.post('/login',contEmpleados.login);
+ruta.get('/get_detalles',contEmpleados.empleadoDetalle);
 
 module.exports=ruta;

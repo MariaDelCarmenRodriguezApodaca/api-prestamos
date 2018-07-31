@@ -91,11 +91,33 @@ function getRutasCobrador(req,res){
     })
 }
 
+function getRutasDetalles(req,res){
+    var sql=`
+    select 
+        rutas.idruta as ruta_idruta,
+        rutas.nombre as ruta_nombre,
+        rutas.colonias as ruta_colonias,
+        rutas.status as ruta_status,
+        sucursales.idsucursal as sucursal_idsucursal,
+        sucursales.nombre as sucursal_nombre
+        FROM rutas 
+        INNER JOIN sucursales on rutas.idsucursal = sucursales.idsucursal    
+    `;
+    var connection = dbConnection();
+    connection.query(sql,(err,result)=>{
+        if(!err){
+            res.status(200).send({result});
+        }else res.status(500).send({message:`Error en la base de datos: ${err}`});
+        connection.destroy();
+    })
+}
+
 module.exports={
 	getRutas,
 	getRuta,
     addRuta,
     updateRuta,
     addRutaCobrador,
-    getRutasCobrador
+    getRutasCobrador,
+    getRutasDetalles
 }
