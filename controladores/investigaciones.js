@@ -42,7 +42,7 @@ function  updateInvestigaciones(req,res){
     connection.query(sql,(err,result)=>{
         if(!err){
             console.log('Investigacion crediticia guardada con exito');
-            res.status(200).send(result);
+            res.status(200).send({result});
         }else res.status(500).send({messaje:`Error al hacer la consulta en la bd  ${err}`});
         connection.destroy();
     });
@@ -52,7 +52,7 @@ function getInvestigaciones(res,res){
     var connection = dbConnection();
     connection.query('SELECT * FROM investigaciones', (err,result)=>{
         if(!err){
-            res.status(200).send(result);
+            res.status(200).send({result});
         }else res.status(500).send({messaje:`Error al consultar la bd ${err}`});
         connection.destroy();
     });
