@@ -58,7 +58,59 @@ function getInvestigaciones(res,res){
     });
 }
 
+function getInvestigacionesDetalles(res,res){
+    var connection = dbConnection();
+    var sql = `
+        SELECT 
+        /*datos de investigaciones*/
+        investigaciones.idinvestigacion as investigacion_idinvestigacion,
+        investigaciones.fecha_investigacion as investigacion_fecha_investigacion,
+        investigaciones.telefonos as investigacion_telefonos,
+        investigaciones.idcliente as investigacion_idcliente,
+        investigaciones.nombre_completo as investigacion_nombre_completo,
+        investigaciones.fecha_nacimiento as investigacion_fecha_nacimiento,
+        investigaciones.edad as investigacion_edad,
+        investigaciones.estado_civil as investigacion_estado_civil,
+        investigaciones.direccion_hogar as investigacion_direccion_hogar,
+        investigaciones.hogar_propio_orentado as investigacion_hogar_propio_orentado,
+        investigaciones.numero_dependientes_economicos as investigacion_numero_dependientes_economicos,
+        investigaciones.monto_credito as investigacion_monto_credito,
+        investigaciones.tipo_comprobante as investigacion_tipo_comprobante,
+        investigaciones.direccion_negocio as investigacion_direccion_negocio,
+        investigaciones.horario as investigacion_horario,
+        investigaciones.propietario_oempleado as investigacion_propietario_oempleado,
+        investigaciones.local_oambulante as investigacion_local_oambulante,
+        investigaciones.negocio_propio_orentado as investigacion_negocio_propio_orentado,
+        investigaciones.contrato_arrendamiento as investigacion_contrato_arrendamiento,
+        investigaciones.nombre_aval as investigacion_nombre_aval,
+        investigaciones.tiempo_conocerse as investigacion_tiempo_conocerse,
+        investigaciones.telefono_aval as investigacion_telefono_aval,
+        investigaciones.nombre_familiar as investigacion_nombre_familiar,
+        investigaciones.telefono_familiar as investigacion_telefono_familiar,
+        investigaciones.parentezco_familiar as investigacion_parentezco_familiar,
+        investigaciones.como_supo as investigacion_como_supo,
+        /*datos de zonas*/
+        zonas.idzona as zona_idzona,
+        zonas.nombre as zona_nombre,
+        /*datos del cobrador*/
+        empleados.idempleado as empleado_idempleado,
+        empleados.nombres as empleado_nombres,
+        empleados.app_pat as empleado_app_pat,
+        empleados.app_mat as empleado_app_mat
+        FROM investigaciones
+        INNER JOIN zonas on investigaciones.zona = zonas.idzona
+        INNER JOIN empleados on investigaciones.cobrador_zona = empleados.idempleado
+    `;
+    connection.query(sql, (err,result)=>{
+        if(!err){
+            res.status(200).send({result});
+        }else res.status(500).send({messaje:`Error al consultar la bd ${err}`});
+        connection.destroy();
+    });
+}
+
 module.exports={
     updateInvestigaciones,
-    getInvestigaciones
+    getInvestigaciones,
+    getInvestigacionesDetalles
 }
