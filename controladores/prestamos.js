@@ -21,7 +21,7 @@ function getPrestamosSinAprobar(req,res){
     var sql = `
     SELECT idprestamo,prestamos.idcliente,prestamos.idnegocio,idsucursal,fecha_solicitud,monto_solicitado,monto_interes,
     monto_conInteres,empleado_captura,prestamos.tipo_credito,prestamos.status,fecha_aprobacion,prestamos.tiempo,interes,
-    nombres as cliente_nombre, negocios.nombre_negocio as cliente_negocio, clientes.telefono as cliente_telefono, creditos.descripcion as
+    nombres as cliente_nombre, negocios.nombre_negocio as cliente_negocio, clientes.telefonos as cliente_telefono, creditos.descripcion as
     creditos_descripcion, clientes.nombres as cliente_nombres, clientes.app_pat as cliente_app_pat, clientes.app_mat as cliente_app_mat,
     negocios.tipo_negocio FROM prestamos INNER JOIN clientes ON prestamos.idcliente = clientes.idcliente 
     INNER JOIN negocios ON prestamos.idnegocio = negocios.idnegocio 
@@ -78,28 +78,18 @@ function nuevoPrestamo(req,res){
                 if(!err){
                     var nombre_cliente = `${result[0].nombres} ${result[0].app_pat} ${result[0].app_mat}`;
                     var telefono_cliente = result[0].telefono
-                    //generar la encuesta:
-                    sql='INSERT INTO encuestas VALUES'+
-                        `(null,${data.idcliente},'${fecha_actual}',null,null,'${nombre_cliente}',null,null,null,null,null,null,'${telefono_cliente}',null,null,${data.idnegocio},null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,'Pendiente')`;
-                    var connection3=dbConnection();
-                    connection3.query(sql,(err,result)=>{
+                    sql='INSERT INTO prestamos VALUES'+
+                        `(null,${data.idcliente},${data.idnegocio},${data.idsucursal},${data.idempresa},'${fecha_actual}','${data.monto_solicitado}','${monto_interes}','${monto_conInteres}','${data.empleado_captura}','${data.tipo_credito}','?',null,'${tiempo}','${interes}',null)`;
+                    var connection4=dbConnection();
+                    connection4.query(sql,(err,result)=>{
                         if(err) res.status(500).send({message:`ERROR ocurrio un error al añadir al cliente ${err} ---> sql: ${sql}`});
-                        if(!err){
-                            console.log(sql,'<=   se guaro la encuesta   =>',result);
-                            sql='INSERT INTO prestamos VALUES'+
-                                `(null,${data.idcliente},${data.idnegocio},${data.idsucursal},${data.idempresa},'${fecha_actual}','${data.monto_solicitado}','${monto_interes}','${monto_conInteres}','${data.empleado_captura}','${data.tipo_credito}','?',null,'${tiempo}','${interes}',null)`;
-                            var connection4=dbConnection();
-                            connection4.query(sql,(err,result)=>{
-                                if(err) res.status(500).send({message:`ERROR ocurrio un error al añadir al cliente ${err} ---> sql: ${sql}`});
-                                if(!err ){
-                                    console.log('Prestamo y encuesta registrada con exito');
-                                    res.status(200).send({result:result});
-                                }
-                                connection4.destroy();
-                            });
+                        if(!err ){
+                            console.log('Prestamo y guardado con exito');
+                            res.status(200).send({result:result});
                         }
-                        connection3.destroy();
+                        connection4.destroy();
                     });
+                        
                }
                 connection2.destroy();
             }); 
@@ -134,8 +124,11 @@ function aprobarRechazarPrestamo(req,res){
                         var tiempo = result[0].tiempo;
                         var idcliente = result[0].idcliente;
                         var empleado_captura = result[0].idempleado;
+                        var interes=result[0].interes;
+                        var monto_interes=result[0].monto_aprobado*(interes/100);
+                        var monto_conInteres=parseFloat(result[0].monto_aprobado)+parseInt(monto_interes);
                         console.log('Calculando cobro unitario');
-                        var cobro_unitario = monto_aprobado / parseInt(tiempo);
+                        var cobro_unitario = monto_conInteres / parseInt(tiempo);
                         console.log('cobro unitario : ',cobro_unitario);
                         // obtenemos datos del tipo de credito:
                         sql = `SELECT * FROM creditos WHERE idcredito=${idcredito}`;
@@ -146,34 +139,58 @@ function aprobarRechazarPrestamo(req,res){
                             if(result.length < 1)  res.status(404).send({message:`No se encontraron creditos`});
                             if(!err && result.length >= 1){
                                 var credito_tipo_credito = result[0].tipo_credito;
-                                var addMoment = '';
-                                switch(credito_tipo_credito) {
-                                case 'Pagos Diarios':
-                                    addMoment = 'days';
-                                    break;
-                                case 'Pagos Semanales':
-                                    addMoment = 'weeks';
-                                    break;
-                                case 'Pagos Mensuales':
-                                    addMoment = 'months'
-                                    break;
-                                }
-                                var values = [];
-                                var fecha_moment  = moment().add(1,`${addMoment}`);
-                                for(var i=1; i <= tiempo ; i++ ){
-                                    values.push(['null',idprestamo,idcliente,empleado_captura,fecha_moment.format('YYYY-MM-DD'),cobro_unitario,'null','null','Pendiente']);
-                                    fecha_moment  = moment().add(i+1,`${addMoment}`);
-                                }
-                                var cobros_sql = `INSERT INTO cobros (idcobro,idprestamo,idcliente,idempleado,fecha_cobro,cantidad_cobro,comentario_cobro,imagen_cobro,status) VALUES ?`;
-                                var connection4=dbConnection();
-                                connection4.query(cobros_sql,[values],(err,result)=>{
-                                    if (err) console.log(`Error en la coneccion 3 ${err} --->sql = ${cobros_sql}`);
+                                var sql =`SELECT * FROM negocios WHERE idcliente=${idcliente}`;
+                                var connection6=dbConnection();
+                                connection6.query(sql,(err,result)=>{
                                     if(!err){
-                                        console.log("Number of records inserted: " + result.affectedRows);
-                                        console.log(`Los cobros se insertaran de la siguiente manera: ${cobros_sql}`);
-                                        res.status(200).send({result:`Prestamo y cobros guardados con exito`});
-                                    }connection4.destroy()
-                                });
+                                        sql=`SELECT * FROM zonas WHERE idzona=${result[0].idzona}`;
+                                        var coneccion7=dbConnection();
+                                        coneccion7.query(sql,(err,result)=>{
+                                            if(!err){
+                                                var cobrador = result[0].idempleado;
+                                                var addMoment = '';
+                                                switch(credito_tipo_credito) {
+                                                case 'Pagos Diarios':
+                                                    addMoment = 'days';
+                                                    break;
+                                                case 'Pagos Semanales':
+                                                    addMoment = 'weeks';
+                                                    break;
+                                                case 'Pagos Mensuales':
+                                                    addMoment = 'months'
+                                                    break;
+                                                }
+                                                var values = [];
+                                                var fecha_moment  = moment().add(1,`${addMoment}`);
+                                                for(var i=1; i <= tiempo ; i++ ){
+                                                    values.push(['null',idprestamo,idcliente,cobrador,fecha_moment.format('YYYY-MM-DD'),cobro_unitario,'null','null','Pendiente']);
+                                                    fecha_moment  = moment().add(i+1,`${addMoment}`);
+                                                }
+                                                var cobros_sql = `INSERT INTO cobros (idcobro,idprestamo,idcliente,idempleado,fecha_cobro,cantidad_cobro,comentario_cobro,imagen_cobro,status) VALUES ?`;
+                                                var connection4=dbConnection();
+                                                connection4.query(cobros_sql,[values],(err,result)=>{
+                                                    if (err) console.log(`Error en la coneccion 3 ${err} --->sql = ${cobros_sql}`);
+                                                    if(!err){
+                                                        console.log("Number of records inserted: " + result.affectedRows);
+                                                        console.log(`Los cobros se insertaran de la siguiente manera: ${cobros_sql}`);
+                                                        sql =`UPDATE prestamos SET fecha_aprobacion='${moment().format('YYYY-MM-DD')}', monto_interes='${monto_interes}', monto_conInteres='${monto_conInteres}' WHERE idprestamo=${idprestamo}`;
+                                                        var connection5=dbConnection();
+                                                        connection5.query(sql,(err,result)=>{
+                                                            if(!err){
+                                                                console.log('si salio papu');
+                                                                res.status(200).send({result});
+                                                            }else res.status(500).send({message:`Error al actualizar papu ${err}`});
+                                                            connection5.destroy();
+                                                        });
+                                                    }
+                                                    connection4.destroy();
+                                                });
+                                            }else res.status(500).send({message:`Error al actualizar papu ${err}`});
+                                            coneccion7.destroy();
+                                        })
+                                    }else res.status(500).send({message:`Error al actualizar papu ${err}`});
+                                    connection6.destroy();
+                                })
                             }
                             connection3.destroy();
                         });

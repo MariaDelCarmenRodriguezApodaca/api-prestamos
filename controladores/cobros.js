@@ -114,7 +114,7 @@ function cobrosXRealizarDia(req,res){
     clientes.nombres as cliente_nombres,
     clientes.app_pat as cliente_app_pat,
     clientes.app_mat as cliente_app_mat,
-    clientes.telefono as cliente_telefono,
+    clientes.telefonos as cliente_telefono,
     negocios.idnegocio as negocio_idnegocio,
     negocios.callenum as negocio_callenum,
     negocios.colonia as negocio_colonia,
@@ -156,8 +156,8 @@ function cobrosXRealizarDia(req,res){
                  console.log(momentString);
                 var status =result[i].cobro_status;
                 if(status=='Pendiente'){
-                    if(status=='Pendiente' && moment(momentString).isSame(hoy) || moment(momentString).isBefore(hoy) ){
-                        console.log(moment(momentString)+'='+hoy)
+                    if(status=='Pendiente' && result[i].cobro_fecha_cobro==hoy || moment(momentString).isBefore(hoy) ){
+                        // console.log(moment(momentString)+'='+hoy)
                         console.log('--------->status', result[i].cobro_status);
                         data.push(result[i]);
                     }
