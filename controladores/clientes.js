@@ -1,179 +1,109 @@
 'use strict'
-const mysql = require('mysql');
 const moment = require('moment');
 const config = require('../config');
 const dbConnection = config.connection;
+var cloudinary = require('cloudinary');
 
-// para la imagen
-const fs = require('fs'); //libreria file system de node que permite trabajar con archivos
-const path = require('path'); //nos permite trabajar con rutas y ficheros
- 
-let getClientes=(req,res)=>{
-	var connection = dbConnection();
-	connection.query(`SELECT * FROM clientes`,(err,result,fields)=>{
-		if(err) res.status(500).send({message:`ERROR ocurrio un error en la consulta`});
-		if(!err){
-			res.status(200).send({result:result});
-		}
-		connection.destroy();
-	});
-}
-
-let getCliente=(req,res)=>{
-	var data = req.params;
-	var idCliente = data.id;
-	var connection=dbConnection();
-	connection.query(`SELECT * FROM clientes WHERE idcliente= '${idCliente}'`,(err,result,fields)=>{
-		if(err) res.status(500).send({message:`ERROR ocurrio un error en la consulta`});
-		if(!err){
-			res.status(200).send({result:result});
-		}
-		connection.destroy();
-	});
-}
-
-let addCliente=(req,res)=>{
+function addCliente(req,res){
 	var data = req.body;
 	console.log('Data:',data);
-	if(!data.nombres || !data.app_pat || !data.app_mat || !data.callenum || !data.colonia || !data.estado || !data.municipio || !data.poblacion || !data.telefono) return res.status(403).send({message:`No se enviaron todos los datos, datos enviados ${data}`});
-	var sql = `INSERT INTO clientes VALUES (null,'${data.nombres}','${data.app_pat}','${data.app_mat}','${data.callenum}','${data.colonia}','${data.estado}','${data.municipio}','${data.poblacion}','${data.telefono}',1,null,null,null,0)`;
+	if(!data.nombres || !data.app_pat || !data.app_mat || !data.telefonos) return res.status(403).send({message:`No se enviaron todos los datos, datos enviados ${data}`});
+	var sql = `INSERT INTO clientes VALUES (null,'${data.nombres}','${data.app_pat}','${data.app_mat}','${data.telefonos}',null,null,'Activo')`;
 	var connection = dbConnection();
 	connection.query(sql,(err,result)=>{
-		if(err) res.status(500).send({message:`ERROR ocurrio un error al añadir al cliente ${err} ---> sql: ${sql}`});
 		if(!err){
 			res.status(200).send({result:result,sql:sql});
-		}
+		}else res.status(500).send({message:`ERROR ocurrio un error al añadir al cliente ${err} ---> sql: ${sql}`});
 		connection.destroy();
 	});
 }
 
 function updateCliente(req,res){
 	var data=req.body;
-	if(!data.nombres || !data.app_pat || !data.app_mat || !data.callenum || !data.colonia || !data.estado || !data.municipio || !data.poblacion || !data.telefono || !data.status) return res.status(403).send({message:`No se enviaron todos los datos, datos enviados ${data}`});
-	var sql= `UPDATE clientes SET nombres='${data.nombres}', app_pat='${data.app_pat}', app_mat='${data.app_mat}', callenum='${data.callenum}', colonia='${data.colonia}', estado='${data.estado}' municipio='${data.municipio}', poblacion='${data.poblacion}', telefono='${data.telefono}', status='${data.status}'`;
+	if(!data.nombres || !data.app_pat || !data.app_mat || !data.telefonos || data.status) return res.status(403).send({message:`No se enviaron todos los datos, datos enviados ${data}`});
+	var sql= `UPDATE clientes SET nombres='${data.nombres}', app_pat='${data.app_pat}', app_mat='${data.app_mat}',telefonos='${data.telefonos}', status='${data.status}'`;
 	var connection= dbConnection();
 	connection.query(sql,(err,result)=>{
-		if(err) res.status(500).send({message:`ERROR ocurrio un error al actualizar al cliente ${err} ---> sql: ${sql}`});
 		if(!err ){
 			res.status(200).send({result:result,sql:sql});
-		}
+		}else res.status(500).send({message:`ERROR ocurrio un error al actualizar al cliente ${err} ---> sql: ${sql}`});
+		connection.destroy();
+	});
+}
+ 
+function getClientes(req,res){
+	var connection = dbConnection();
+	connection.query(`SELECT * FROM clientes`,(err,result,fields)=>{
+		if(!err){
+			res.status(200).send({result:result});
+		}else res.status(500).send({message:`ERROR ocurrio un error en la consulta`});
 		connection.destroy();
 	});
 }
 
-
-//subir imagenes al servidor
-function imagenDireccion(req,res){
-	var clienteId= req.params.id;
-	if(req.files){
-		// tomamos el path de la image
-		var file_path = req.files.image.path;
-		console.log('file_path: ----->',file_path);
-		//dividimos el path por las \ que contenga
-		var file_split = file_path.split('\\');
-		console.log('file_split: ----->',file_split);
-		//tomamos el nombre el fichero
-		var file_name = file_split[2];
-		console.log('file_name: ----->',file_name);
-		//tomamos la extencion del archivo
-		var extencion_split = file_name.split('\.'); //cortamos el split cpor el punto como es caracter especial ponemos el \
-		var file_extencion = extencion_split[1];
-		console.log('file_extencion: ----->',file_extencion);
-		//comprobamos que las extenciones sean correctas:
-		if(file_extencion=='png' || file_extencion=='PNG'|| file_extencion == 'jpg' || extencion_split=='jpeg' || file_extencion=='gif'){
-			var connection = dbConnection();
-			var nuevaPath="'"+file_split[0]+'/'+file_split[1]+'/'+file_split[2]+"'";
-			var sql=`UPDATE clientes SET imagen_direccion = '${file_name}' WHERE idcliente = ${clienteId}`;
-			connection.query(sql,(err,result)=>{
-				if(err) res.status(500).send({message:`ERROR ocurrio un error: ${err} en la consulta sql: ${sql}`});
-				if(!err){
-					res.status(200).send({result:result});
-				}
-				connection.destroy();
-			});
-		}else{
-			//si no responder y borrar el fichero que se subio con multipart en uploads 
-			eliminarArchivo(file_path)//eliminamos el archivo
-			res.status(403).send({message:`No se han subido imagene valida`});//notificamos que no envio un archivo valido
-		}
-	}else{
-		res.status(403).send({message:`No se han subido imagenes`});
-	}
-}
-
-function imagenIne(req,res){
-	var clienteId= req.params.id;
-	if(req.files){
-		var file_path = req.files.image.path;
-		console.log('file_path: ----->',file_path);
-		var file_split = file_path.split('\\');
-		console.log('file_split: ----->',file_split);
-		var file_name = file_split[2];
-		console.log('file_name: ----->',file_name);
-		var extencion_split = file_name.split('\.'); 
-		var file_extencion = extencion_split[1];
-		console.log('file_extencion: ----->',file_extencion);
-		if(file_extencion=='png' || file_extencion == 'jpg' || extencion_split=='jpeg' || file_extencion=='gif'){
-			var connection = dbConnection();
-			var nuevaPath="'"+file_split[0]+'/'+file_split[1]+'/'+file_split[2]+"'";
-			var sql=`UPDATE clientes SET imagen_ine = '${file_name}' WHERE idcliente = ${clienteId}`;
-			connection.query(sql,(err,result)=>{
-				if(err) res.status(500).send({message:`ERROR ocurrio un error: ${err} en la consulta sql: ${sql}`});
-				if(!err){
-					res.status(200).send({result:result});
-				}
-				connection.destroy();
-			});
-		}else{
-			//si no responder y borrar el fichero que se subio con multipart en uploads 
-			eliminarArchivo(file_path)//eliminamos el archivo
-			res.status(403).send({message:`No se han subido imagene valida`});//notificamos que no envio un archivo valido
-		}
-	}else{
-		res.status(403).send({message:`No se han subido imagenes`});
-	}
-}
-
-function eliminarArchivo(file_path){
-	fs.unlink(file_path,(err)=>{
-		console.log('archivo eliminado:',file_path)
+function getCliente(req,res){
+	var data = req.params;
+	var idCliente = data.id;
+	var connection=dbConnection();
+	connection.query(`SELECT * FROM clientes WHERE idcliente= '${idCliente}'`,(err,result,fields)=>{
+		if(!err){
+			res.status(200).send({result:result});
+		}else res.status(500).send({message:`ERROR ocurrio un error en la consulta`});
+		connection.destroy();
 	});
 }
 
-function regresarImg(req,res){
-	var image_file = req.params.image_file;
-	var image_path='./uploads/clientes/'+image_file;
-	// comprobamos que existe
-	fs.exists(image_path,(exist)=>{
-		if(exist){
-			res.sendFile(path.resolve(image_path));
-		}else(
-			res.status(404).send({message:`No existe la imagen`})
-		);
-	})
-
+function uploadImageIne(req,res){
+	var idcliente = req.params.id;
+	if(req.files){
+		console.log('Llego un archivo al servidor');
+		console.log(req.files.image);
+		var ruta_temporal = req.files.image.path; //el campo que enviamos se llama image
+        cloudinary.v2.uploader.upload(ruta_temporal,(err,result)=>{
+			if(!err){
+				var imagen_ine = `${result.url},${result.public_id}`;
+				var sql = `UPDATE clientes SET imagen_ine = '${imagen_ine}' WHERE idcliente=${idcliente}`;
+				var connection = dbConnection();
+				connection.query(sql,(err,result)=>{
+					if(!err){
+						console.log(`Imagen ine actualizada de cliente: ${idcliente}`);
+						res.status(200).send(result);
+					}else res.status(500).send({message:`Error, al actualizar imagen_ine en la base de datos`});
+					connection.destroy();
+				});
+			}else res.status(500).send({message:`Error, al subir imagen ine a cloudinary: ${err}`})
+		});
+	}else res.status(500).send({message:'Error, no se envio ningun archivo'});
 }
 
-function regresarImgRuta(req,res){
-	var image_path=req.body.ruta;
-	// comprobamos que existe
-	fs.exists(image_path,(exist)=>{
-		if(exist){
-			res.sendFile(path.resolve(image_path));
-		}else(
-			res.status(404).send({message:`No existe la imagen`})
-		);
-	})
-
+function uploadImageDireccion(req,res){
+	var idcliente = req.params.id;
+	if(req.files){
+		console.log('Llego un archivo al servidor');
+		console.log(req.files.image);
+		var ruta_temporal = req.files.image.path; //el campo que enviamos se llama image
+        cloudinary.v2.uploader.upload(ruta_temporal,(err,result)=>{
+			if(!err){
+				var imagen_direccion = `${result.url},${result.public_id}`;
+				var sql = `UPDATE clientes SET imagen_direccion = '${imagen_direccion}' WHERE idcliente=${idcliente}`;
+				var connection = dbConnection();
+				connection.query(sql,(err,result)=>{
+					if(!err){
+						console.log(`Imagen ine actualizada de cliente: ${idcliente}`);
+						res.status(200).send(result);
+					}else res.status(500).send({message:`Error, al actualizar imagen_ine en la base de datos`});
+					connection.destroy();
+				});
+			}else res.status(500).send({message:`Error, al subir imagen ine a cloudinary: ${err}`})
+		});
+	}else res.status(500).send({message:'Error, no se envio ningun archivo'});
 }
 
 module.exports={
+	addCliente,
+	updateCliente,
 	getClientes,
 	getCliente,
-	addCliente,
-	imagenDireccion,
-	imagenIne,
-	regresarImg,
-	regresarImgRuta,
-	updateCliente
+	uploadImageIne,
+	uploadImageDireccion
 }
