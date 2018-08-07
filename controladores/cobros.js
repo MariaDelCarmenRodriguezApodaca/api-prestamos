@@ -210,6 +210,71 @@ function pagoCompleto(req,res){
 }
 
 
+function pagoExacto(req,res){
+    var info_cobro = req.body.cobro;
+    //var info_cobro=req.body.cobro; //datos del cobro
+    var cantidad_a_pagar=req.body.cantidad; //cantidad exacta que se abonara 
+    var comentario = req.body.comentario;
+    var sql;//para las consultas a la bd.
+    console.log(req.body);
+    var connection = dbConnection()
+    connection.connect((err)=>{
+        if(!err){
+            sql=`SELECT * FROM cobros WHERE idprestamo=${info_cobro.prestamo_idprestamo} AND status = 'Pendiente'`;
+            connection.query(sql,(err,cobros)=>{
+                if(!err){
+                    if(cantidad_a_pagar >= parseFloat(cobros[0].cantidad_cobro)  && cantidad_a_pagar > 0 ){ 
+                        console.log('paso la condicion 1 --> if(cantidad_a_pagar > info_cobro.cobro_cantidad_cobro) ');
+                            console.log('entro -------------------');
+                            for(let i=0; i < cobros.length ; i++){
+                                var idcobro = cobros[i].idcobro;
+                                if( parseFloat(cobros[i].cantidad_cobro) > parseFloat(cantidad_a_pagar)  ) {
+                                    console.log(`Paso la condicion 2: --> ${cobros[i].cantidad_cobro} > ${cantidad_a_pagar}`);
+                                    var nueva_c= parseFloat(cobros[i].cantidad_cobro) - parseFloat(cantidad_a_pagar);
+                                    console.log(nueva_c);
+                                    sql = `UPDATE cobros SET cantidad_cobro='${nueva_c}', comentario_cobro='${comentario}' WHERE idcobro=${cobros[i].idcobro}`;
+                                    i = cobros.length + 1;
+                                    cantidad_a_pagar = 0.00;
+                                    connection.query(sql,(err,result)=>{
+                                        if(!err){
+                                            i = cobros.length;
+                                            res.status(200).send(result);
+                                        }else{
+                                            cantidad_a_pagar = req.body.cantidad;
+                                            res.status(500).send({message:`Error al actualizar: ${err}`});
+                                        } 
+                                        connection.destroy();
+                                    });
+                                }else if( parseFloat(cobros[i].cantidad_cobro) <= cantidad_a_pagar){
+                                    cantidad_a_pagar = parseFloat(cantidad_a_pagar) - parseFloat(cobros[i].cantidad_cobro); 
+                                    console.log(`Paso la condicion 3: --> ${cobros[i].cantidad_cobro} <= ${cantidad_a_pagar}`);
+                                    sql = `UPDATE cobros SET status='Pagado', comentario_cobro='${comentario}' WHERE idcobro=${cobros[i].idcobro}`;
+                                    connection.query(sql,(err,resultUpdate)=>{
+                                        if(!err){
+                                            console.log(cantidad_a_pagar); 
+                                        }else{
+                                            cantidad_a_pagar = parseFloat(cantidad_a_pagar) + parseFloat(cobros[i].cantidad_cobro); 
+                                            res.status(500).send({message:`Error al hacer update ${err}`});
+                                        }
+                                    });
+                                }
+                            }    
+                    }else res.status(500).send({message:`Error en la consulta ${err}, sql==> ${sql}`});
+                }else{
+                    console.log(err);
+                    connection.destroy();
+                    console.log(info_cobro);
+                }
+            });
+        }else {
+            connection.destroy();
+            res.status(500).send({message:`Error al conectar con la bd ${err}`});
+        }
+    });
+    
+}
+
+
 module.exports={
     getCobros,
     getCobrosPorCliente,
@@ -219,5 +284,6 @@ module.exports={
     getCobrosAtrasadosXCliente,
     cobrosXRealizarDia,
     pagoRequerido,
-    pagoCompleto
+    pagoCompleto,
+    pagoExacto
 }

@@ -7,7 +7,7 @@ var md_upload = multiparty({ uploadDir:'./uploads' });
 ruta.get('/get', contNegocios.getNegocios);
 ruta.get('/get/:id', contNegocios.getNegocio);
 ruta.post('/nuevo',contNegocios.addNegocio);
-ruta.put('/update/:id',contNegocios.updateNegocio);
+
 ruta.post('/uploadImageNegocio/:id', md_upload, contNegocios.uploadImageNegocio);
 ruta.put('/updateImageNegocio/:id', md_upload, contNegocios.updateImageNegocio);
 

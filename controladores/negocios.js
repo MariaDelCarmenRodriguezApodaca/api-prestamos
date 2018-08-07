@@ -3,132 +3,97 @@ const config = require('../config');
 const dbConnection = config.connection;
 const cloudinary = require('cloudinary');
 
+var mysql = require('mysql');
+var pool  = config.pool;
+
+
 function addNegocio(req,res){
     var data = req.body;
-    if(!data.idcliente || !data.nombre_negocio || !data.callenum ||!data.colonia || !data.estado || !data.municipio || !data.poblacion ||!data.tipo_negocio || !data.giro_negocio || !data.idzona) return res.status(403).send({message:`No se enviaron todos los datos`})
-    var connection = dbConnection();
-    var sql = `INSERT INTO negocios VALUES (null,${data.idcliente},'${data.nombre_negocio}','${data.callenum}','${data.colonia}','${data.estado}','${data.municipio}','${data.poblacion}','${data.tipo_negocio}',${data.giro_negocio},${data.idzona})`
-    connection.query(sql,(err,result)=>{
+    var sql; 
+    if(!data.idcliente || !data.nombre || !data.tipo || !data.descripcion_giro || !data.idzona || !data.comentarios) return res.status(403).send({message:`No se enviaron todos los datos`})
+    
+    pool.getConnection((err,connection)=>{
         if(!err){
-            // si el negocio se inservi verifica si ya hay encuesta con el id del cliente: 
-            var fecha_investigacion = moment().format('YYYY-MM-DD');
-            sql= `SELECT * FROM zonas WHERE idzona=${data.idzona}`;
-            var connection1=dbConnection();
-            connection1.query(sql,(err,result)=>{
+            sql = `INSERT INTO negocios VALUES (null,${data.idcliente},'${data.nombre}','${data.descripcion_giro}','${data.tipo}',${data.idzona},'${data.comentarios}')`;
+            connection.query(sql,(err,result)=>{
                 if(!err){
-                    var z = result[0]; //Z z= result de zonas
-                    console.log(z);
-                    sql=`SELECT * FROM investigaciones WHERE idcliente=${data.idcliente}`;
-                    var connection2=dbConnection();
-                    connection2.query(sql,(err,result,fields)=>{
+                    var fecha_investigacion = moment().format('YYYY-MM-DD');
+                    sql= `SELECT * FROM zonas WHERE idzona=${data.idzona}`;
+                    connection.query(sql,(err,zonas)=>{
                         if(!err){
-                            if(result.length >= 1){
-                                //si la encontro
-                                console.log(`Este cliente SI tenia otra investigacion`, result);
-                                var i = result[0]; // i = result de investigaciones
-                                sql = `INSERT INTO investigaciones VALUES ( null, 
-                                    '${fecha_investigacion}',
-                                    '${z.idzona}',
-                                    '${z.idempleado}', 
-                                    '${i.telefonos}',
-                                    '${i.idcliente}',
-                                    '${i.nombre_completo}', 
-                                    '${i.fecha_nacimiento}',
-                                    '${i.edad}',
-                                    '${i.estado_civil}',
-                                    '${i.direccion_hogar}', 
-                                    '${i.hogar_propio_orentado}',
-                                    '${i.numero_dependientes_economicos}', null, 
-                                    '${i.tipo_comprobante}', 
-                                    null, null, null, null, null, null, null, null, null, null, null, null, null
-                                )`;
-                                var connection3=dbConnection();
-                                connection3.query(sql,(err,result)=>{
-                                    if(!err){
-                                        console.log('Negocio añadido exitosamente e investigacion generada con datos existentes');
-                                        res.status(200).send({result});
-                                    }else res.status(500).send({message:`Error al hacer la consulta en la base de datos ${err} `});
-                                    connection3.destroy();
-                                });
-
-                            }else{
-                                console.log(`Este cliente NO tenia otro negocio`);
-                                sql = `SELECT * FROM clientes WHERE  idcliente=${data.idcliente}`;
-                                var connection3 = dbConnection();
-                                connection3.query(sql,(err,result)=>{
+                            var z=zonas[0];
+                            console.log('Zonas: ',z);
+                            sql=`SELECT * FROM investigaciones WHERE idcliente=${data.idcliente}`;
+                            connection.query(sql,(err,investigaciones)=>{
                                 if(!err){
-                                    console.log(result[0]);
-                                    var c = result[0];
-                                        sql = `INSERT INTO investigaciones VALUES(
-                                            null,
+                                    console.log('Investigaciones: ',investigaciones);
+                                    var i = investigaciones[0];
+                                    if(i.length > 0){
+                                        console.log('El cliente SI tenia una investigacion previa');
+                                        sql = `INSERT INTO investigaciones VALUES ( null, 
                                             '${fecha_investigacion}',
                                             '${z.idzona}',
-                                            '${z.idempleado}',
-                                            '${c.telefonos}',
-                                            '${c.idcliente}',
-                                            '${c.nombres} ${c.app_pat} ${c.app_mat}',
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            'Colonia ${data.colonia}, ${data.callenum}, ${data.poblacion}, ${data.municipio}, ${data.estado}',
-                                            null,
-                                            null,
-                                            '${data.tipo_negocio}',
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null,
-                                            null
+                                            '${z.idempleado}', 
+                                            '${i.telefonos}',
+                                            '${i.idcliente}',
+                                            '${i.nombre_completo}', 
+                                            '${i.fecha_nacimiento}',
+                                            '${i.edad}',
+                                            '${i.estado_civil}',
+                                            '${i.direccion_hogar}', 
+                                            '${i.hogar_propio_orentado}',
+                                            '${i.numero_dependientes_economicos}', null, 
+                                            '${i.tipo_comprobante}', 
+                                            null, null, null, null, null, null, null, null, null, null, null, null, null
                                         )`;
-                                        console.log(sql);
-                                        var connection4=dbConnection();
-                                        connection4.query(sql,(err,result)=>{
+                                        connection.query(sql,(err,result)=>{
                                             if(!err){
-                                                console.log('Negocio guardado con exite e investigacion nueva registrada',result);
-                                                res.status(200).send({result});
-                                            }else res.status(500).send({message:`Error al hacer la consulta en la base de datos ${err}`});
-                                            connection4.destroy();
+                                                console.log('Negocio añadido exitosamente e investigacion generada con datos existentes');
+                                                res.status(200).send({result}); 
+                                            }else res.status(500).send({message:`Error insertar en la bd: ${err}`});
                                         });
-                                    }else res.status(500).send({message:`Error al hacer la consulta en la base de datos ${err}`});
-                                    connection3.destroy();
-                                });
-                            }
-                        }else res.status(500).send({message:`Error al hacer la consulta en la base de datos ${err}`});
-                        connection2.destroy();
-                    }); 
-                }else res.status(500).send({message:`Error al hacer la consulta en la base de datos ${err}`});
-                connection1.destroy();
+                                    }else {
+                                        console.log('El cliente NO tenia una investigacion previa');
+                                        sql = `SELECT * FROM clientes WHERE  idcliente=${data.idcliente}`;
+                                        connection.query(sql,(err,clientes)=>{
+                                            if(!err){
+                                                console.log('Cliente: ',clientes);
+                                                var c = clientes[0];
+                                                sql = `INSERT INTO investigaciones VALUES(
+                                                    null,
+                                                    '${fecha_investigacion}',
+                                                    '${z.idzona}',
+                                                    '${z.idempleado}',
+                                                    '${c.telefonos}',
+                                                    '${c.idcliente}',
+                                                    '${c.nombres} ${c.app_pat} ${c.app_mat}',
+                                                    null, null,null,null,null, null,null,null,null, null,null,
+                                                    '${data.tipo}',
+                                                    null,null, null,null,null,null,null,null, null
+                                                )`; 
+                                                connection.query(sql,(err,result)=>{
+                                                    if(!err){
+                                                        console.log('Negocio guardado con exite e investigacion nueva registrada',result);
+                                                        res.status(200).send({result}); 
+                                                    }else res.status(500).send({message:`Error insertar en la bd: ${err}`});
+                                                }); 
+                                            }else res.status(500).send({message:`Error consultar en la bd: ${err}`});
+                                        });
+                                    }
+                                }else res.status(500).send({message:`Error consultar en la bd: ${err}`});
+                            });
+                        }else res.status(500).send({message:`Error consultar en la bd: ${err}`});
+                    });
+                }else res.status(500).send({message:`Error insertar en la bd: ${err}`});
             });
-            
-            //res.status(500).send({message:`Error al hacer la consulta a la base de datos ${err} SQL= ${sql}`});
-            //res.status(200).send({result:`negocio guardada`});
-        }else res.status(500).send({message:`Error al hacer la consulta a la base de datos ${err} SQL= ${sql}`});
-        connection.destroy();
+        }else res.status(500).send({message:`Error al conectar con la bd: ${err}`});
+        connection.release();
     });
-}
+};
 
-function updateNegocio(req,res){
-    var idnegocio = req.params.id;
-    var data = req.body;
-    if(!data.idcliente || !data.nombre_negocio || !data.callenum || !data.colonia || !data.estado || !data.municipio || !data.poblacion || !data.tipo_negocio || !data.giro_negocio || !data.idzona) return res.status(403).send({message:`No se enviaron todos los datos`})
-    var connection = dbConnection();
-    var sql = `UPDATE negocios SET  nombre_negocio='${data.nombre_negocio}', callenum='${data.callenum}', colonia='${data.colonia}',estado='${data.estado}',municipio='${data.municipio}',poblacion='${data.poblacion}', tipo_negocio='${data.tipo_negocio}',giro_negocio=${data.giro_negocio}, idzona=${data.idzona} WHERE idnegocio=${idnegocio}`;
-    connection.query(sql,(err,result)=>{ 
-        if(!err){
-            res.status(200).send({result});
-        }else res.status(500).send({message:`Error al hacer la consulta a la base de datos ${err} SQL= ${sql}`});
-        connection.destroy();
-    });
-}
+
+
+
 
 function getNegocios(req,res){
     var connection = dbConnection();
@@ -210,7 +175,6 @@ module.exports={
 	getNegocios,
     getNegocio,
     addNegocio,
-    updateNegocio,
     uploadImageNegocio,
     updateImageNegocio
 }
