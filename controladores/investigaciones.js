@@ -99,7 +99,7 @@ function getInvestigacionesDetalles(res,res){
         empleados.app_mat as empleado_app_mat
         FROM investigaciones
         INNER JOIN zonas on investigaciones.zona = zonas.idzona
-        INNER JOIN empleados on investigaciones.cobrador_zona = empleados.idempleado
+        LEFT JOIN empleados on investigaciones.cobrador_zona = empleados.idempleado
     `;
     connection.query(sql, (err,result)=>{
         if(!err){

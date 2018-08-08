@@ -109,37 +109,35 @@ function getCobrosAtrasadosXCliente(req,res){
 
 function cobrosXRealizarDia(req,res){
     var sql = `
-    SELECT 
-    clientes.idcliente as cliente_idcliente,
-    clientes.nombres as cliente_nombres,
-    clientes.app_pat as cliente_app_pat,
-    clientes.app_mat as cliente_app_mat,
-    clientes.telefonos as cliente_telefono,
-    negocios.idnegocio as negocio_idnegocio,
-    negocios.callenum as negocio_callenum,
-    negocios.colonia as negocio_colonia,
-    negocios.municipio as negocio_municipio,
-    negocios.poblacion as negocio_poblacio,
-    negocios.tipo_negocio as negocio_tipo_negocio,
-    negocios.nombre_negocio as negocio_nombre_negocio,
-    cobros.idcobro as cobro_idcobro,
-    cobros.cantidad_cobro as cobro_cantidad_cobro,
-    cobros.fecha_cobro as cobro_fecha_cobro,
-    cobros.status as cobro_status,
-    prestamos.idprestamo as prestamo_idprestamo,
-    prestamos.monto_solicitado as prestamo_monto_solicitado,
-    prestamos.monto_conInteres as prestamo_monto_conInteres,
-    prestamos.interes as prestamo_interes,
-    creditos.idcredito as credito_idcredito,
-    creditos.descripcion as credito_descripcion,
-    empleados.idempleado as empleado_idempleado,
-    empleados.nombres as empleado_nombre
-    FROM cobros
-    INNER JOIN clientes on cobros.idcliente = clientes.idcliente
-    INNER JOIN negocios on clientes.idcliente = negocios.idcliente AND clientes.idcliente = cobros.idcliente
-    INNER JOIN prestamos on cobros.idprestamo = prestamos.idprestamo
-    INNER JOIN creditos on prestamos.tipo_credito = creditos.idcredito AND prestamos.idprestamo = cobros.idprestamo
-    INNER JOIN empleados on cobros.idempleado = empleados.idempleado
+        SELECT 
+        clientes.idcliente as cliente_idcliente,
+        clientes.nombres as cliente_nombres,
+        clientes.app_pat as cliente_app_pat,
+        clientes.app_mat as cliente_app_mat,
+        clientes.telefonos as cliente_telefono,
+        negocios.idnegocio as negocio_idnegocio,
+        investigaciones.direccion_negocio as investigaciones_direccion_negocio,
+        negocios.tipo as negocio_tipo,
+        negocios.nombre as negocio_nombre,
+        cobros.idcobro as cobro_idcobro,
+        cobros.cantidad_cobro as cobro_cantidad_cobro,
+        cobros.fecha_cobro as cobro_fecha_cobro,
+        cobros.status as cobro_status,
+        prestamos.idprestamo as prestamo_idprestamo,
+        prestamos.monto_solicitado as prestamo_monto_solicitado,
+        prestamos.monto_conInteres as prestamo_monto_conInteres,
+        prestamos.interes as prestamo_interes,
+        creditos.idcredito as credito_idcredito,
+        creditos.descripcion as credito_descripcion,
+        empleados.idempleado as empleado_idempleado,
+        empleados.nombres as empleado_nombre
+        FROM cobros
+        INNER JOIN clientes on cobros.idcliente = clientes.idcliente
+        INNER JOIN negocios on clientes.idcliente = negocios.idcliente AND clientes.idcliente = cobros.idcliente
+        INNER JOIN investigaciones on clientes.idcliente = investigaciones.idcliente
+        INNER JOIN prestamos on cobros.idprestamo = prestamos.idprestamo
+        INNER JOIN creditos on prestamos.tipo_credito = creditos.idcredito AND prestamos.idprestamo = cobros.idprestamo
+        INNER JOIN empleados on cobros.idempleado = empleados.idempleado
     `
     var connection = dbConnection();
     var data = [];

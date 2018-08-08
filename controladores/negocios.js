@@ -27,8 +27,9 @@ function addNegocio(req,res){
                             connection.query(sql,(err,investigaciones)=>{
                                 if(!err){
                                     console.log('Investigaciones: ',investigaciones);
-                                    var i = investigaciones[0];
-                                    if(i.length > 0){
+                                    
+                                    if(investigaciones.length > 0){
+                                        var i = investigaciones[0];
                                         console.log('El cliente SI tenia una investigacion previa');
                                         sql = `INSERT INTO investigaciones VALUES ( null, 
                                             '${fecha_investigacion}',
@@ -116,6 +117,39 @@ function getNegocio(req,res){
     });
 }
 
+function getDetalleNegocio(req,res){
+    pool.getConnection((err,connection)=>{
+        if(!err){
+            var sql = `
+                SELECT 
+                /*datos del negocio*/
+                negocios.idnegocio as negocio_idnegocio,
+                negocios.nombre as negocio_nombre,
+                negocios.descripcion_giro as negocio_descripcion_giro,
+                negocios.tipo as negocio_tipo,
+                negocios.comentarios as negocio_comentarios,
+                /*datos de la zona*/
+                zonas.idzona as zona_idzona,
+                zonas.nombre as zona_nombre,
+                zonas.idempleado as zona_empleado,
+                /*datos del cliente*/
+                clientes.idcliente as cliente_idcliente,
+                clientes.nombres as cliente_nombre,
+                clientes.app_pat as cliente_app_pat,
+                clientes.app_mat as cliente_app_mat
+                FROM negocios 
+                INNER JOIN zonas on negocios.idzona = zonas.idzona
+                INNER JOIN clientes on clientes.idcliente = negocios.idnegocio
+            `;
+            connection.query(sql,(err,result)=>{
+                if(!err){
+                    res.status(200).send({result});
+                }else res.status(500).send({message:`Error en la consulta ${err}`});
+            });
+        }else res.status(500).send({message:`Error al conectar en la base de datos ${err}`});
+        connection.release();
+    });
+}
 
 function uploadImageNegocio(req,res){
     var idnegocio = req.params.id;
@@ -132,7 +166,7 @@ function uploadImageNegocio(req,res){
 				connection.query(sql,(err,result)=>{
 					if(!err){
 						console.log(`Imagen del negocio añadida: ${idnegocio}`);
-						res.status(200).send(result);
+						res.status(200).send({result});
 					}else res.status(500).send({message:`Error, al añadir la imagen del negocio ${err}`});
 					connection.destroy();
 				});
@@ -170,11 +204,27 @@ function updateImageNegocio(req,res){
 }
 
 
+function getFotos(req,res){
+    pool.getConnection((err,connection)=>{
+        if(!err){
+            var sql = `SELECT * FROM fotos_negocios`;
+            connection.query(sql,(err,result)=>{
+                if(!err){
+                    res.status(200).send({result});
+                }else res.status(500).send({message:`Error en la consulta ${err}`});
+            });
+        }else res.status(500).send({message:`Error al conectar en la base de datos ${err}`});
+        connection.release();
+    });
+}
+
 
 module.exports={
 	getNegocios,
     getNegocio,
     addNegocio,
+    getDetalleNegocio,
     uploadImageNegocio,
-    updateImageNegocio
+    updateImageNegocio,
+    getFotos
 }

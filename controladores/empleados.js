@@ -92,15 +92,11 @@ function empleadoDetalle(req,res){
     empleados.status as empleado_status,
     empleados.puesto as empleado_puesto,
     empleados.derecho_esp as empleado_derecho_esp,
-    /*info de la empresa */
-    empresas.idempresa as empresa_idempresa,
-    empresas.razon_social as empresa_razon_social,
     /*info de la sucursal */
     sucursales.idsucursal as sucursal_idsucursal,
     sucursales.nombre as sucursal_nombre
     FROM empleados
     INNER JOIN sucursales ON empleados.sucursal = sucursales.idsucursal
-    INNER JOIN empresas ON empleados.negocio = empresas.idempresa
     WHERE empleados.puesto != 'Administrador'
     `;
     var connection = dbConnection()

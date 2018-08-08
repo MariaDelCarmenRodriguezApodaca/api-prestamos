@@ -19,14 +19,36 @@ let getPrestamos=(req,res)=>{
 function getPrestamosSinAprobar(req,res){
     var connection = dbConnection();
     var sql = `
-    SELECT idprestamo,prestamos.idcliente,prestamos.idnegocio,idsucursal,fecha_solicitud,monto_solicitado,monto_interes,
-    monto_conInteres,empleado_captura,prestamos.tipo_credito,prestamos.status,fecha_aprobacion,prestamos.tiempo,interes,
-    nombres as cliente_nombre, negocios.nombre_negocio as cliente_negocio, clientes.telefonos as cliente_telefono, creditos.descripcion as
-    creditos_descripcion, clientes.nombres as cliente_nombres, clientes.app_pat as cliente_app_pat, clientes.app_mat as cliente_app_mat,
-    negocios.tipo_negocio FROM prestamos INNER JOIN clientes ON prestamos.idcliente = clientes.idcliente 
-    INNER JOIN negocios ON prestamos.idnegocio = negocios.idnegocio 
-    INNER JOIN creditos On prestamos.tipo_credito = creditos.idcredito 
-    WHERE prestamos.status ='?'
+        SELECT
+        idprestamo,
+        prestamos.idcliente,
+        prestamos.idnegocio,
+        idsucursal,
+        fecha_solicitud,
+        monto_solicitado,
+        monto_interes,
+        monto_conInteres,
+        empleado_captura,
+        prestamos.tipo_credito,
+        prestamos.status,
+        fecha_aprobacion,
+        prestamos.tiempo,
+        interes,
+        nombres AS cliente_nombre,
+        negocios.nombre AS cliente_negocio,
+        clientes.telefonos AS cliente_telefono,
+        creditos.descripcion AS creditos_descripcion,
+        clientes.nombres AS cliente_nombres,
+        clientes.app_pat AS cliente_app_pat,
+        clientes.app_mat AS cliente_app_mat,
+        negocios.tipo as tipo_negocio
+        FROM
+            prestamos
+        INNER JOIN clientes ON prestamos.idcliente = clientes.idcliente
+        INNER JOIN negocios ON prestamos.idnegocio = negocios.idnegocio
+        INNER JOIN creditos ON prestamos.tipo_credito = creditos.idcredito
+        WHERE
+            prestamos.status = '?'
     `;
     connection.query(sql, (err, result, fields)=>{
         if(err)  res.status(500).send({message:`Error en la consulta ${err}`});

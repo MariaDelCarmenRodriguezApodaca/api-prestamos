@@ -3,6 +3,7 @@ const config = require('../config');
 const dbConnection = config.connection;
 
 
+
 let getEmpresas=(req,res)=>{
     var connection = dbConnection();
     connection.query(`SELECT * FROM empresas `, (err, result, fields)=>{
@@ -28,9 +29,9 @@ let getEmpresa=(req,res)=>{
 
 let addEmpresa= (req,res)=>{
     var data = req.body;
-    if(!data.razon_social || !data.direccion || !data.descripcion) return  res.status(403).send({message:`No se mandaron todos los campos`});
+    if(!data.razon_social || !data.direccion || !data.descripcion || !data.rfc) return  res.status(403).send({message:`No se mandaron todos los campos`});
     var connection = dbConnection();
-    var sql = `INSERT INTO empresas VALUES (null,'${data.razon_social}','${data.direccion}','${data.descripcion}') `;
+    var sql = `INSERT INTO empresas VALUES (null,'${data.razon_social}','${data.direccion}','${data.descripcion}','${data.rfc}') `;
     connection.query(sql,(err,result)=>{
         if(err)  res.status(500).send({message:`Error al hacer la consulta a la base de datos ${err} SQL= ${sql}`});
         if(!err){
@@ -43,9 +44,9 @@ let addEmpresa= (req,res)=>{
 function updateEmpresa(req,res){
     var idEmpresa = req.params.id;
     var data = req.body;
-    if(!data.razon_social || !data.direccion || !data.descripcion)return res.status(403).send({message:`No sen enviaron todos los datos`});
+    if(!data.razon_social || !data.direccion || !data.descripcion || !data.rfc ) return res.status(403).send({message:`No sen enviaron todos los datos`});
     var connection = dbConnection();
-    connection.query(`UPDATE empresas set razon_social='${data.razon_social}', direccion = '${data.direccion}', descripcion ='${data.descripcion}' WHERE idempresa = ${idEmpresa}`,(err,result)=>{
+    connection.query(`UPDATE empresas set razon_social='${data.razon_social}', direccion = '${data.direccion}', descripcion ='${data.descripcion}', rfc='${data.rfc}' WHERE idempresa = ${idEmpresa}`,(err,result)=>{
         if(err)  res.status(500).send({message:`Error al hacer la consulta a la base de datos ${err} SQL= ${sql}`});
         if(!err){
             res.status(200).send({result:`Empresa Actualizada`});
